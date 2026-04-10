@@ -10,6 +10,7 @@ export default function Layout() {
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("token");
     toast.success("Logged out successfully");
     navigate("/");
   };

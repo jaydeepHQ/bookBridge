@@ -91,39 +91,47 @@ export default function ManageAudio() {
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-gray-50/50 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                                <th className="px-6 py-4 text-center">Audio ID</th>
-                                <th className="px-6 py-4 text-center">Book ID</th>
-                                <th className="px-6 py-4 text-center">Audio Path</th>
-                                <th className="px-6 py-4 text-center">User ID</th>
-                                <th className="px-6 py-4 text-center">Delete</th>
+                        <thead className="bg-[#F8F9FC] border-b border-gray-100 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                            <tr>
+                                <th className="px-8 py-5">Audio ID</th>
+                                <th className="px-8 py-5">Book ID</th>
+                                <th className="px-8 py-5">Audio Path</th>
+                                <th className="px-8 py-5">User ID</th>
+                                <th className="px-8 py-5 text-center">Delete</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {currentItems.length > 0 ? (
                                 currentItems.map((item) => (
-                                    <tr key={item.id} className="hover:bg-gray-50/30 transition-colors">
-                                        <td className="px-6 py-4 text-sm text-gray-700 text-center font-medium">{item.id}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-700 text-center">{item.bookId}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-500 text-center">
-                                            {item.audioPath}
+                                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
+                                        <td className="px-8 py-6 text-sm font-black text-gray-800">{item.id}</td>
+                                        <td className="px-8 py-6 text-sm font-bold text-gray-400">{item.bookId}</td>
+                                        <td className="px-8 py-6">
+                                            <span className="text-[13px] font-medium text-gray-400 font-mono italic bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
+                                                {item.audioPath}
+                                            </span>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-700 text-center">{item.userId}</td>
-                                        <td className="px-6 py-4 text-center">
+                                        <td className="px-8 py-6 text-sm font-bold text-gray-400">{item.userId}</td>
+                                        <td className="px-8 py-6 text-center">
                                             <button
                                                 onClick={() => deleteAudio(item.id)}
-                                                className="text-red-500 hover:scale-110 transition-transform"
+                                                className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition-all active:scale-90"
                                             >
-                                                <Trash2 size={18} fill="currentColor" fillOpacity={0.1} />
+                                                <Trash2 size={20} />
                                             </button>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-8 text-center text-gray-500 text-sm">
-                                        No audio files found.
+                                    <td colSpan="5" className="px-8 py-12 text-center text-gray-500 font-medium">
+                                        <div className="flex flex-col items-center justify-center gap-3">
+                                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+                                                <Search size={32} className="text-gray-300" />
+                                            </div>
+                                            <p className="text-lg text-gray-900 font-bold">No audio files found</p>
+                                            <p className="text-sm">We couldn't find any audio files matching your criteria.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             )}

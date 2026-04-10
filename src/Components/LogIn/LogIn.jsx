@@ -4,6 +4,8 @@ import LogoWhite from "../../assets/Photos/Logo-White.png";
 import Navbar from "../Navbar.jsx";
 import { Eye, EyeOff, BookOpen } from "lucide-react"; // Using lucide for better icons
 import toast from "react-hot-toast";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -41,15 +43,37 @@ export default function Login() {
   };
 
   // 3. Form Submit Handler
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validate()) {
-      if (formData.email === "admin@gmail.com" && formData.password === "admin@123") {
-        localStorage.setItem("isAuthenticated", "true");
-        toast.success("Login successful! Welcome to the dashboard.");
-        navigate('/dashboard');
-      } else {
-        toast.error("Invalid email or password");
+      try {
+        const response = await axios.post("https://book-bridge-sage.vercel.app/api/users/login", {
+          email: formData.email,
+          password: formData.password
+        }, {
+          headers: {
+            "Content-Type": "application/json",
+            "accept": "*/*"
+          }
+        });
+
+        const data = response.data;
+        if (data.token) {
+          const decoded = jwtDecode(data.token);
+          
+          if (decoded.role?.toLowerCase() === 'admin') {
+            localStorage.setItem("isAuthenticated", "true");
+            localStorage.setItem("token", data.token);
+            toast.success("Login successful! Welcome Admin.");
+            navigate('/dashboard');
+          } else {
+            toast.error("Access Denied: Admin privileges required.");
+          }
+        } else {
+          toast.error("Invalid email or password.");
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Invalid email or password.");
       }
     }
   };
