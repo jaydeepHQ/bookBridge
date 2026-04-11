@@ -1,18 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import PageHeader from '../Common/PageHeader';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 export default function ManageTranslations() {
-  const [translations, setTranslations] = useState([
-    // { id: 'TR-001', bookId: 'BK-123', language: 'Spanish', userId: 'USR-456', color: 'bg-blue-50 text-blue-600' },
-    // { id: 'TR-002', bookId: 'BK-124', language: 'French', userId: 'USR-789', color: 'bg-green-50 text-green-600' },
-    // { id: 'TR-003', bookId: 'BK-125', language: 'German', userId: 'USR-321', color: 'bg-purple-50 text-purple-600' },
-    // { id: 'TR-004', bookId: 'BK-126', language: 'Italian', userId: 'USR-654', color: 'bg-yellow-50 text-yellow-600' },
-    // { id: 'TR-005', bookId: 'BK-127', language: 'Portuguese', userId: 'USR-987', color: 'bg-red-50 text-red-600' },
-    // { id: 'TR-006', bookId: 'BK-128', language: 'Spanish', userId: 'USR-234', color: 'bg-blue-50 text-blue-600' },
-    // { id: 'TR-007', bookId: 'BK-129', language: 'French', userId: 'USR-567', color: 'bg-green-50 text-green-600' },
-    // { id: 'TR-008', bookId: 'BK-130', language: 'German', userId: 'USR-890', color: 'bg-purple-50 text-purple-600' },
-  ]);
+  const [translations, setTranslations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTranslations = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          toast.error("Not authenticated.");
+          setLoading(false);
+          return;
+        }
+
+        const response = await axios.get("https://book-bridge-sage.vercel.app/api/file/files", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "accept": "*/*",
+          }
+        });
+
+        const dataArr = Array.isArray(response.data) ? response.data : (response.data.files || response.data.data || []);
+
+        const colors = [
+          'bg-blue-50 text-blue-600', 'bg-green-50 text-green-600',
+          'bg-purple-50 text-purple-600', 'bg-yellow-50 text-yellow-600',
+          'bg-red-50 text-red-600'
+        ];
+
+        const mappedData = dataArr.map((item, idx) => ({
+          id: item.file_id || item.id || `TR-${idx + 1000 + idx}`,
+          bookId: item.book_id || item.filename || item.bookId || `BK-${idx + 1000}`,
+          language: item.language || item.mimetype || 'Unknown',
+          userId: item.user_id || item.userId || 'System',
+          color: colors[idx % colors.length]
+        }));
+
+        setTranslations(mappedData);
+      } catch (error) {
+        console.error("Error fetching translations:", error);
+        toast.error("Failed to fetch translations from server");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTranslations();
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterLanguage, setFilterLanguage] = useState('All Languages');
@@ -106,7 +145,16 @@ export default function ManageTranslations() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {currentItems.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="5" className="px-8 py-12 text-center text-gray-500 font-medium">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      <p className="text-lg text-gray-900 font-bold">Loading translations...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : currentItems.length > 0 ? (
                 currentItems.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="px-8 py-6 text-sm font-black text-gray-800">{item.id}</td>

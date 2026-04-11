@@ -69,17 +69,33 @@ export default function ManageBooks() {
         const mappedFiles = dataArr.map((item, idx) => {
           const backupDate = new Date();
           backupDate.setDate(backupDate.getDate() - idx);
+          
+          let pathValue = '#';
+          let bufferArray = null;
+          
+          if (item.data) {
+            if (typeof item.data === 'string') {
+              pathValue = item.data;
+            } else if (item.data.type === 'Buffer' && Array.isArray(item.data.data)) {
+              bufferArray = item.data.data;
+            } else if (Array.isArray(item.data)) {
+              bufferArray = item.data;
+            }
+          }
+
           return {
-            id: item.file_id || item.id || `#${idx + 1000}`,
+            id: item.file_id || `#${idx + 1000}`,
             userId: item.user_id || item.userId || 'System',
-            title: item.title || item.name || item.filename || 'Untitled Book',
-            category: item.category || item.type || 'Document',
-            path: item.file_url || item.url || item.path || '#',
+            title: item.filename || 'Untitled Book',
+            category: item.mimetype || 'Document',
+            path: pathValue,
+            bufferData: bufferArray,
+            mimetype: item.mimetype || 'application/octet-stream',
             createdAt: item.created_at || item.createdAt || backupDate.toISOString().split('T')[0],
             color: colors[idx % colors.length]
           };
         });
-
+        console.log(dataArr)
         setBooks(mappedFiles);
       } catch (error) {
         console.error("Error fetching books:", error);
@@ -121,6 +137,38 @@ export default function ManageBooks() {
     }
   };
 
+  const handleDownload = (book) => {
+    if (book.bufferData && Array.isArray(book.bufferData)) {
+      try {
+        const uint8Array = new Uint8Array(book.bufferData);
+        const blob = new Blob([uint8Array], { type: book.mimetype });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = book.title;
+        document.body.appendChild(a);
+        a.click();
+        
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error("Download error:", error);
+        toast.error("Failed to download the file.");
+      }
+    } else if (book.path && book.path !== '#') {
+      const a = document.createElement('a');
+      a.href = book.path;
+      a.download = book.title;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      toast.error("No valid file data available for download.");
+    }
+  };
+
   return (
     <>
       <div className="p-8 min-h-screen bg-[#F8F9FC] font-['Inter']">
@@ -142,11 +190,9 @@ export default function ManageBooks() {
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-600 outline-none focus:ring-2 focus:ring-blue-500/10 transition"
               >
-                <option>All Categories</option>
-                <option>Document</option>
-                <option>Audio</option>
-                <option>Fiction</option>
-                <option>Science</option>
+                {['All Categories', ...new Set(books.map(b => b.category))].map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
               </select>
               <select
                 value={sortFilter}
@@ -173,7 +219,16 @@ export default function ManageBooks() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {currentItems.length > 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="px-8 py-12 text-center text-gray-500 font-medium">
+                      <div className="flex flex-col items-center justify-center gap-3">
+                        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-lg text-gray-900 font-bold">Loading books...</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : currentItems.length > 0 ? (
                   currentItems.map((book) => (
                     <tr key={book.id} className="hover:bg-gray-50/50 transition-colors group">
                       <td className="px-8 py-6 text-sm font-black text-gray-800">{book.id}</td>
@@ -181,11 +236,13 @@ export default function ManageBooks() {
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
                           {/* Dynamic Colored Icon Box */}
-                          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${book.color} shadow-sm group-hover:scale-110 transition-transform`}>
+                          <div className={`shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center ${book.color} shadow-sm group-hover:scale-110 transition-transform`}>
                             <Book size={20} />
                           </div>
-                          <div>
-                            <p className="text-sm font-black text-gray-800">{book.title}</p>
+                          <div className="max-w-[150px] sm:max-w-[200px] lg:max-w-[280px] xl:max-w-[400px]">
+                            <p className="text-sm font-black text-gray-800 max-w-[200px] truncate" title={book.title}>
+                              {book.title}
+                            </p>
                             <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">{book.category}</p>
                           </div>
                         </div>
@@ -197,15 +254,13 @@ export default function ManageBooks() {
                       </td>
                       <td className="px-8 py-6 text-center">
                         <div className="flex gap-2 justify-center">
-                          <a
-                            href={book.path}
-                            download={book.title}
-                            target="_blank"
-                            rel="noreferrer"
+                          <button
+                            onClick={() => handleDownload(book)}
+                            title="Download"
                             className="p-3 text-blue-500 hover:bg-blue-50 rounded-xl transition-all active:scale-90 inline-flex"
                           >
                             <Download size={20} />
-                          </a>
+                          </button>
                           <button
                             onClick={() => confirmDeleteBook(book.id)}
                             className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition-all active:scale-90"

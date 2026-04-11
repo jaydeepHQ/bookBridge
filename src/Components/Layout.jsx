@@ -8,12 +8,34 @@ export default function Layout() {
   const navigate = useNavigate();
 
   const handleLogout = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("token");
+    localStorage.removeItem("loginTime");
     toast.success("Logged out successfully");
     navigate("/");
   };
+
+  // Check for session timeout (12 hours)
+  React.useEffect(() => {
+    const checkTimeout = () => {
+      const loginTime = localStorage.getItem("loginTime");
+      if (loginTime) {
+        const twelveHours = 12 * 60 * 60 * 1000;
+        if (Date.now() - parseInt(loginTime, 10) >= twelveHours) {
+          toast.error("Session expired. Please log in again.");
+          handleLogout();
+        }
+      }
+    };
+    
+    // Check initially
+    checkTimeout();
+    // Then check every minute
+    const intervalId = setInterval(checkTimeout, 60000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
 
   const menuItems = [
     { path: '/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },

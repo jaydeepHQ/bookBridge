@@ -16,6 +16,19 @@ import Documentation from "./Components/Documentation/Documentation.jsx";
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  const loginTime = localStorage.getItem("loginTime");
+  const twelveHours = 12 * 60 * 60 * 1000;
+
+  // Check if session has expired
+  if (isAuthenticated && loginTime) {
+    if (Date.now() - parseInt(loginTime, 10) >= twelveHours) {
+      localStorage.removeItem("isAuthenticated");
+      localStorage.removeItem("token");
+      localStorage.removeItem("loginTime");
+      return <Navigate to="/" />;
+    }
+  }
+
   return isAuthenticated ? children : <Navigate to="/" />;
 };
 

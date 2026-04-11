@@ -64,6 +64,7 @@ export default function Login() {
           if (decoded.role?.toLowerCase() === 'admin') {
             localStorage.setItem("isAuthenticated", "true");
             localStorage.setItem("token", data.token);
+            localStorage.setItem("loginTime", Date.now().toString());
             toast.success("Login successful! Welcome Admin.");
             navigate('/dashboard');
           } else {
