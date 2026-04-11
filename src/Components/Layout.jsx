@@ -28,12 +28,12 @@ export default function Layout() {
         }
       }
     };
-    
+
     // Check initially
     checkTimeout();
     // Then check every minute
     const intervalId = setInterval(checkTimeout, 60000);
-    
+
     return () => clearInterval(intervalId);
   }, []);
 
@@ -45,7 +45,6 @@ export default function Layout() {
     { path: '/audio', icon: <Headphones size={20} />, label: 'Audio' },
     { path: '/quiz', icon: <HelpCircle size={20} />, label: 'Quiz' },
     { path: '/summary', icon: <Book size={20} />, label: 'Summary' },
-    { path: '/settings', icon: <Settings size={20} />, label: 'Settings' },
   ];
 
   return (
@@ -83,7 +82,7 @@ export default function Layout() {
       {/* RIGHT SIDE CONTENT */}
       <div className="flex-1 ml-64">
         {/* TOP BLUE HEADER - Only exists here! */}
-        <header className="bg-blue-600 h-16 flex items-center justify-between px-8 text-white sticky top-0 z-10">
+        <header className="bg-blue-600 h-16 flex items-center justify-between px-8 text-white sticky top-0 z-50">
           <h2 className="text-lg font-medium">Admin Dashboard</h2>
         </header>
 
