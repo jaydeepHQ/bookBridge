@@ -44,6 +44,7 @@ export default function Layout() {
     { path: '/translations', icon: <Languages size={20} />, label: 'Translations' },
     { path: '/audio', icon: <Headphones size={20} />, label: 'Audio' },
     { path: '/quiz', icon: <HelpCircle size={20} />, label: 'Quiz' },
+    { path: '/summary', icon: <Book size={20} />, label: 'Summary' },
     { path: '/settings', icon: <Settings size={20} />, label: 'Settings' },
   ];
 

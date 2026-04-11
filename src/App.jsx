@@ -13,6 +13,7 @@ import ManageAudio from "./Components/Audio/ManageAudio.jsx";
 import ManageQuiz from "./Components/Quiz/ManageQuiz.jsx";
 import ManageSettings from "./Components/Settings/ManageSettings.jsx";
 import Documentation from "./Components/Documentation/Documentation.jsx";
+import ManageSummary from "./Components/Summary/ManageSummary.jsx";
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
@@ -50,6 +51,7 @@ function App() {
             <Route path="/translations" element={<ManageTranslations />} />
             <Route path="/audio" element={<ManageAudio />} />
             <Route path="/quiz" element={<ManageQuiz />} />
+            <Route path="/summary" element={<ManageSummary />} />
             <Route path="/settings" element={<ManageSettings />} />
           </Route>
 

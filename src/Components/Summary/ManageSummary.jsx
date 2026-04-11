@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Trash2, ChevronLeft, ChevronRight, Languages } from 'lucide-react';
+import { Search, Trash2, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
 import PageHeader from '../Common/PageHeader';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -19,8 +19,8 @@ const getLanguageBadgeColor = (language) => {
     return colors[language.toLowerCase()] || 'bg-teal-50 text-teal-700 border-teal-200';
 };
 
-export default function ManageTranslations() {
-  const [translations, setTranslations] = useState([]);
+export default function ManageSummary() {
+  const [summaries, setSummaries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [availableLanguages, setAvailableLanguages] = useState(['All Languages']);
   const [filterLanguage, setFilterLanguage] = useState('All Languages');
@@ -28,7 +28,7 @@ export default function ManageTranslations() {
   const [itemToDelete, setItemToDelete] = useState(null);
 
   useEffect(() => {
-    const fetchTranslations = async () => {
+    const fetchSummaries = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -44,8 +44,8 @@ export default function ManageTranslations() {
           }
         });
 
-        const allDataArr = Array.isArray(response.data) ? response.data : (response.data.files || response.data.data || response.data.outputs || []);
-        const dataArr = allDataArr.filter(item => item.operation_type === 'translate');
+        const allDataArr = Array.isArray(response.data) ? response.data : (response.data.outputs || response.data.data || []);
+        const dataArr = allDataArr.filter(item => item.operation_type === 'summary');
 
         const colors = [
           'bg-blue-50 text-blue-600', 'bg-green-50 text-green-600',
@@ -66,21 +66,21 @@ export default function ManageTranslations() {
           color: colors[idx % colors.length]
         }));
 
-        setTranslations(mappedData);
-        
+        setSummaries(mappedData);
+
         // Dynamically extract unique languages
         const uniqueLangs = [...new Set(mappedData.map(item => item.language).filter(Boolean))];
         setAvailableLanguages(['All Languages', ...uniqueLangs]);
 
       } catch (error) {
-        console.error("Error fetching translations:", error);
-        toast.error("Failed to fetch translations from server");
+        console.error("Error fetching summaries:", error);
+        toast.error("Failed to fetch summaries from server");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTranslations();
+    fetchSummaries();
   }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -101,34 +101,33 @@ export default function ManageTranslations() {
           "Authorization": `Bearer ${token}`
         }
       });
-      setTranslations(translations.filter(t => t.id !== itemToDelete));
+      setSummaries(summaries.filter(s => s.id !== itemToDelete));
       setShowDeleteModal(false);
       setItemToDelete(null);
-      toast.success("Translation deleted successfully.");
+      toast.success("Summary deleted successfully.");
     } catch (error) {
       console.error("Delete err:", error);
-      toast.error("Failed to delete translation.");
+      toast.error("Failed to delete summary.");
     }
   };
 
-  const filteredTranslations = translations.filter(item => {
-    const matchesSearch =
-      String(item.id).toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredSummaries = summaries.filter(item => {
+    const matchesSearch = String(item.id).toLowerCase().includes(searchTerm.toLowerCase()) ||
       String(item.filename).toLowerCase().includes(searchTerm.toLowerCase()) ||
       String(item.userName).toLowerCase().includes(searchTerm.toLowerCase()) ||
-      String(item.userEmail).toLowerCase().includes(searchTerm.toLowerCase()) ||
-      String(item.language).toLowerCase().includes(searchTerm.toLowerCase());
+      String(item.language).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(item.userEmail).toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesLanguage = filterLanguage === 'All Languages' || item.language === filterLanguage;
 
     return matchesSearch && matchesLanguage;
   });
 
-  const totalItems = filteredTranslations.length;
+  const totalItems = filteredSummaries.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredTranslations.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredSummaries.slice(indexOfFirstItem, indexOfLastItem);
 
   const handlePageChange = (pageNumber) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
@@ -145,8 +144,8 @@ export default function ManageTranslations() {
       <div className="p-8 min-h-screen bg-[#F8F9FC] font-['Inter']">
         <div>
           <PageHeader
-            title="Manage Translations"
-            subtitle="View and manage all document translations in the system"
+            title="Manage Summaries"
+            subtitle="View and manage all document summaries in the system"
           />
         </div>
 
@@ -155,7 +154,7 @@ export default function ManageTranslations() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
             <input
               type="text"
-              placeholder="Search translations..."
+              placeholder="Search summaries..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500/10"
@@ -172,12 +171,13 @@ export default function ManageTranslations() {
           </select>
         </div>
 
+        {/* Table Card */}
         <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead className="bg-[#F8F9FC] border-b border-gray-100 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
                 <tr>
-                  <th className="px-8 py-5">Translation ID</th>
+                  <th className="px-8 py-5">Summary ID</th>
                   <th className="px-8 py-5">File</th>
                   <th className="px-8 py-5">Language</th>
                   <th className="px-8 py-5">User Info</th>
@@ -191,7 +191,7 @@ export default function ManageTranslations() {
                     <td colSpan="6" className="px-8 py-12 text-center text-gray-500 font-medium">
                       <div className="flex flex-col items-center justify-center gap-3">
                         <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-lg text-gray-900 font-bold">Loading translations...</p>
+                        <p className="text-lg text-gray-900 font-bold">Loading summaries...</p>
                       </div>
                     </td>
                   </tr>
@@ -202,7 +202,7 @@ export default function ManageTranslations() {
                       <td className="px-8 py-6">
                           <div className="flex items-center gap-4">
                               <div className={`w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center ${item.color} shadow-sm group-hover:scale-110 transition-transform`}>
-                                  <Languages size={20} />
+                                  <FileText size={20} />
                               </div>
                               <div>
                                   <p className="text-sm font-bold text-gray-800 truncate max-w-[200px]" title={item.filename}>{item.filename}</p>
@@ -241,7 +241,7 @@ export default function ManageTranslations() {
                         <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
                           <Search size={32} className="text-gray-300" />
                         </div>
-                        <p className="text-lg text-gray-900 font-bold">No translations found</p>
+                        <p className="text-lg text-gray-900 font-bold">No summaries found</p>
                       </div>
                     </td>
                   </tr>
@@ -252,7 +252,7 @@ export default function ManageTranslations() {
 
           <div className="p-6 border-t border-gray-50 flex justify-between items-center bg-white">
             <p className="text-gray-400 text-sm font-medium">
-              Showing {filteredTranslations.length > 0 ? indexOfFirstItem + 1 : 0} to {Math.min(indexOfLastItem, totalItems)} of {totalItems}
+              Showing {filteredSummaries.length > 0 ? indexOfFirstItem + 1 : 0} to {Math.min(indexOfLastItem, totalItems)} of {totalItems}
             </p>
             <div className="flex gap-2">
               <button
@@ -300,9 +300,9 @@ export default function ManageTranslations() {
               <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-50/50">
                 <Trash2 className="text-red-500" size={32} />
               </div>
-              <h2 className="text-xl font-black text-gray-900 mb-2">Delete Translation?</h2>
+              <h2 className="text-xl font-black text-gray-900 mb-2">Delete Summary?</h2>
               <p className="text-sm text-gray-500 font-medium px-4 mb-8">
-                Are you sure you want to delete this translation? This action cannot be undone.
+                Are you sure you want to delete this summary? This action cannot be undone.
               </p>
               <div className="flex gap-3 justify-center border-t border-gray-100 pt-6">
                 <button
