@@ -50,7 +50,7 @@ export default function ManageBooks() {
           return;
         }
 
-        const response = await axios.get("https://book-bridge-sage.vercel.app/api/file", {
+        const response = await axios.get("/api/file", {
           headers: {
             "Authorization": `Bearer ${token}`,
             "accept": "*/*",
@@ -119,7 +119,7 @@ export default function ManageBooks() {
       const token = localStorage.getItem("token");
       // Assumed delete structure. Standard local fallback included just in case.
       if (token && typeof bookToDelete === 'number') {
-        await axios.delete(`https://book-bridge-sage.vercel.app/api/file/delete/${bookToDelete}`, {
+        await axios.delete(`/api/file/delete/${bookToDelete}`, {
           headers: {
             "Authorization": `Bearer ${token}`,
             "accept": "application/json",

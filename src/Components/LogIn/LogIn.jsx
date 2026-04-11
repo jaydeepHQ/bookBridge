@@ -47,7 +47,7 @@ export default function Login() {
     e.preventDefault();
     if (validate()) {
       try {
-        const response = await axios.post("https://book-bridge-sage.vercel.app/api/users/login", {
+        const response = await axios.post("/api/users/login", {
           email: formData.email,
           password: formData.password
         }, {

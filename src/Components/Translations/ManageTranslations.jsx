@@ -18,7 +18,7 @@ export default function ManageTranslations() {
           return;
         }
 
-        const response = await axios.get("https://book-bridge-sage.vercel.app/api/file/files", {
+        const response = await axios.get("/api/file/files", {
           headers: {
             "Authorization": `Bearer ${token}`,
             "accept": "*/*",

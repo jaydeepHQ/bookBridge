@@ -19,7 +19,7 @@ export default function UserDashboard() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('https://book-bridge-sage.vercel.app/api/users');
+        const response = await axios.get('/api/users');
 
         if (response.data && response.data.users) {
           const normalizedUsers = response.data.users.map((apiUser) => ({
@@ -90,7 +90,7 @@ export default function UserDashboard() {
         // Assuming user_id exists in formData from previous normalization, otherwise fallback to 1 
         const userId = formData.user_id || 1;
 
-        await axios.put(`https://book-bridge-sage.vercel.app/api/users/update-profile/${userId}`, formDataPayload, {
+        await axios.put(`/api/users/update-profile/${userId}`, formDataPayload, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'accept': '*/*'
@@ -120,7 +120,7 @@ export default function UserDashboard() {
           password: formData.password
         };
 
-        const response = await axios.post('https://book-bridge-sage.vercel.app/api/users/register', payload, {
+        const response = await axios.post('/api/users/register', payload, {
           headers: {
             'Content-Type': 'application/json',
             'accept': '*/*'
@@ -160,7 +160,7 @@ export default function UserDashboard() {
     if (!userToDelete) return;
 
     try {
-      await axios.delete(`https://book-bridge-sage.vercel.app/api/users/delete/${userToDelete}`, {
+      await axios.delete(`/api/users/delete/${userToDelete}`, {
         headers: {
           'accept': '*/*'
         }

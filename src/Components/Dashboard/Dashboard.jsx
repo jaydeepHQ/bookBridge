@@ -46,11 +46,11 @@ export default function Dashboard() {
         const headers = token ? { "Authorization": `Bearer ${token}` } : {};
 
         // Fetch Users
-        const usersRes = await axios.get("https://book-bridge-sage.vercel.app/api/users", { headers });
+        const usersRes = await axios.get("/api/users", { headers });
         const usersData = Array.isArray(usersRes.data) ? usersRes.data : (usersRes.data.users || []);
         
         // Fetch Files
-        const filesRes = await axios.get("https://book-bridge-sage.vercel.app/api/file/files", { headers });
+        const filesRes = await axios.get("/api/file/files", { headers });
         const filesData = Array.isArray(filesRes.data) ? filesRes.data : (filesRes.data.files || filesRes.data.data || []);
 
         // Calculate Stats
